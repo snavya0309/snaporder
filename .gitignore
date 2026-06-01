@@ -4,3 +4,10 @@ node_modules/
 dist/
 .DS_Store
 *.log
+
+# Python
+venv/
+__pycache__/
+*.pyc
+*.pyo
+.python-version
