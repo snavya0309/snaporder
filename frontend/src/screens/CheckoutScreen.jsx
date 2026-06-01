@@ -70,7 +70,16 @@ export default function CheckoutScreen({ cart, result, onCartChange, onOrder, on
     setPlacing(true)
     setError('')
     try {
-      const order = await placeOrder({ paymentMethod: 'COD' })
+      const order = await placeOrder({
+        paymentMethod: 'COD',
+        restaurantId: cart.restaurant.id,
+        addressId: cart.address.id,
+        items: cart.items.map(item => ({
+          restaurantId: cart.restaurant.id,
+          itemId: item.itemId,
+          quantity: item.quantity
+        }))
+      })
       onOrder(order)
     } catch (err) {
       setError(err.message || 'Order failed. Please try again.')

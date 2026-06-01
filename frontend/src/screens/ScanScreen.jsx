@@ -1,11 +1,12 @@
 import { useRef, useState } from 'react'
-import { identifyDish } from '../utils/api'
+import { identifyDish, searchByName } from '../utils/api'
 
 export default function ScanScreen({ onResult }) {
   const [loading, setLoading] = useState(false)
   const [step, setStep] = useState('')
   const [error, setError] = useState('')
   const [preview, setPreview] = useState('')
+  const [textDish, setTextDish] = useState('')
   const inputRef = useRef()
 
   async function handleImage(file) {
@@ -50,7 +51,38 @@ export default function ScanScreen({ onResult }) {
             Try mock scan
           </button>
         </div>
-        {error && <p className="error-text">{error}</p>}
+        {error && (
+          <div className="search-fallback">
+            <p className="error-text">{error}</p>
+            <p className="lede" style={{ fontSize: '0.9rem', marginTop: 8 }}>Or search by dish name:</p>
+            <form className="action-row" onSubmit={async e => {
+              e.preventDefault()
+              if (!textDish.trim()) return
+              setLoading(true)
+              setError('')
+              setStep('Searching...')
+              try {
+                const result = await searchByName(textDish.trim())
+                onResult({ ...result, imagePreview: '' })
+              } catch {
+                setError('Search failed. Try a different dish name.')
+                setLoading(false)
+                setStep('')
+              }
+            }}>
+              <input
+                className="dish-search-input"
+                value={textDish}
+                onChange={e => setTextDish(e.target.value)}
+                placeholder="e.g. Masala Dosa, Burger..."
+                disabled={loading}
+              />
+              <button className="primary-button" type="submit" disabled={loading || !textDish.trim()}>
+                Search
+              </button>
+            </form>
+          </div>
+        )}
       </div>
 
       <div className="scan-panel">

@@ -27,5 +27,9 @@ app.use('/api/support', supportRoute)
 
 app.get('/health', (_, res) => res.json({ ok: true, service: 'snaporder-api' }))
 
-const PORT = process.env.PORT || 3001
-app.listen(PORT, () => console.log(`SnapOrder API → http://localhost:${PORT}`))
+if (process.env.VERCEL !== '1') {
+  const PORT = process.env.PORT || 3001
+  app.listen(PORT, () => console.log(`SnapOrder API → http://localhost:${PORT}`))
+}
+
+export default app

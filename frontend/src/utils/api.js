@@ -1,5 +1,15 @@
 const BASE = import.meta.env.VITE_API_URL || ''
 
+export async function searchByName(dish) {
+  const res = await fetch(`${BASE}/api/identify`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ dish })
+  })
+  if (!res.ok) throw new Error('search failed')
+  return res.json()
+}
+
 export async function identifyDish(base64Image) {
   const res = await fetch(`${BASE}/api/identify`, {
     method: 'POST',

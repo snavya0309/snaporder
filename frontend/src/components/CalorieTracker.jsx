@@ -1,4 +1,4 @@
-export default function CalorieTracker({ total, itemCount, macros, entries, onClear }) {
+export default function CalorieTracker({ total, itemCount, macros, entries, onClear, onViewHistory }) {
   return (
     <aside className="tracker" aria-label="Daily calorie tracker">
       <div>
@@ -11,7 +11,9 @@ export default function CalorieTracker({ total, itemCount, macros, entries, onCl
         <span>F {macros.fat}g</span>
       </div>
       <div className="tracker-foot">
-        <span>{entries.length > 0 ? `${itemCount} item${itemCount === 1 ? '' : 's'} logged` : 'No items logged'}</span>
+        <button className="text-button" type="button" onClick={onViewHistory}>
+          {entries.length > 0 ? `${itemCount} item${itemCount === 1 ? '' : 's'} logged` : 'History'}
+        </button>
         {entries.length > 0 && (
           <button className="text-button" type="button" onClick={onClear}>
             Reset

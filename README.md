@@ -1,160 +1,160 @@
-# SnapOrder 📸🍛
+# SnapOrder
 
-> Snap a dish photo → get calories → order it instantly from Swiggy
+> Snap a dish photo → identify it with AI → see calories → order on Swiggy
 
-SnapOrder uses AI vision to identify any dish from a photo, breaks down its nutrition, and lets you order the closest match on Swiggy — all in under 30 seconds.
+## What's built
 
-## Features
+| Screen | Status | Notes |
+|---|---|---|
+| ScanScreen | ✅ | Camera + file upload, image preview, mock scan button |
+| ResultsScreen | ✅ | Dish hero, nutrition band, restaurant matches, veg/non-veg filter, address selector, cart bar |
+| CheckoutScreen | ✅ | Address, items, coupon input, bill breakdown, COD order |
+| TrackingScreen | ✅ | Live polling, animated progress bar, timeline, report issue |
+| HistoryScreen | ✅ | Daily calorie log with macros, accessible from header |
 
-- 📷 **Snap any dish** — homemade, restaurant, or from social media
-- 🔍 **AI identification** — Claude Vision detects dish, cuisine, confidence score
-- 🔥 **Instant nutrition** — calories, carbs, protein, fat per serving
-- 🛒 **One-tap ordering** — directly via Swiggy Food MCP
-- 📊 **Daily calorie tracker** — running total across every ordered item
+| Feature | Status | Notes |
+|---|---|---|
+| Claude Vision | ✅ (mock) | Real call wired; mock returns random dish if no API key |
+| Nutrition lookup | ✅ | 14-dish DB with fuzzy match |
+| Swiggy search | ✅ (mock) | 8 cuisine profiles: biryani, pizza, burger, dosa, noodles, pasta, curry, salad |
+| Cart & checkout | ✅ (mock) | Full cart flow with totals, delivery fee, taxes |
+| Coupons | ✅ (mock) | SNAP50, BIRYANI75, PIZZA50, FREEDEL, UPI100 — category-aware |
+| Order tracking | ✅ (mock) | Status advances automatically based on elapsed time |
+| Calorie tracker | ✅ | localStorage, resets daily, tracks macros |
+| Text search fallback | ✅ | If scan fails, user can type dish name |
+| Swiggy MCP (real) | ⏳ | Stubs in place, waiting for API access |
+| Claude Vision (real) | ⏳ | Needs `ANTHROPIC_API_KEY` in backend `.env` |
 
 ## Tech stack
 
 | Layer | Tech |
 |---|---|
-| Frontend | React + Vite |
+| Frontend | React 18 + Vite 4 |
+| Styling | Custom CSS (Syne font, dark theme, #FC5622) |
 | AI Vision | Claude claude-sonnet-4-20250514 (multimodal) |
-| Ordering | Swiggy Food MCP |
-| Backend | Node.js + Express |
-| Nutrition DB | Custom mapped dataset |
-| Auth | Swiggy OAuth 2.0 |
-| Deploy | Vercel (frontend) + Railway (backend) |
+| Ordering | Swiggy Food MCP (mocked) |
+| Backend | Node.js + Express (ESM) |
+| Deploy | Vercel — single project, frontend + backend together |
 
 ## Repo structure
 
 ```
 snaporder/
-├── frontend/                  # React app (Person 1)
+├── vercel.json                   # Single-project deploy config
+├── frontend/
 │   └── src/
-│       ├── screens/           # ScanScreen, ResultsScreen, CheckoutScreen, TrackingScreen
-│       ├── components/        # CalorieBanner, DishCard, OrderOptions
-│       ├── hooks/             # useCamera, useCalorieTracker
-│       └── utils/             # api.js
-├── backend/                   # Node.js API (Person 2)
-│   ├── routes/                # /identify, /order, /track
-│   ├── services/              # claude.js, swiggy.js, nutrition.js
-│   └── middleware/            # auth.js
-├── shared/                    # API contract — both teammates reference this
-└── docs/
+│       ├── screens/
+│       │   ├── ScanScreen.jsx
+│       │   ├── ResultsScreen.jsx
+│       │   ├── CheckoutScreen.jsx
+│       │   ├── TrackingScreen.jsx
+│       │   └── HistoryScreen.jsx
+│       ├── components/
+│       │   └── CalorieTracker.jsx
+│       ├── hooks/
+│       │   └── useCalorieTracker.js
+│       ├── utils/
+│       │   └── api.js
+│       ├── App.jsx
+│       └── styles.css
+├── backend/
+│   ├── routes/
+│   │   ├── identify.js           # POST /api/identify (image or dish name)
+│   │   ├── search.js             # POST /api/search
+│   │   ├── cart.js               # GET/POST/DELETE /api/cart
+│   │   ├── coupons.js            # GET /api/coupons, POST /api/coupons/apply
+│   │   ├── order.js              # POST /api/order
+│   │   ├── track.js              # GET /api/track/:orderId
+│   │   ├── addresses.js          # GET /api/addresses
+│   │   └── support.js            # POST /api/support/report
+│   └── services/
+│       ├── claude.js             # Claude Vision + mock fallback
+│       ├── swiggy.js             # All Swiggy logic (mock)
+│       └── nutrition.js          # Nutrition DB
+└── shared/
+    └── api.types.js              # JSDoc API contract
 ```
 
-## API contract
-
-Lock this before splitting work. Both teammates build against these shapes.
-
-### `POST /api/identify`
-
-**Request**
-```json
-{ "image": "<base64 jpeg>" }
-```
-
-**Response**
-```json
-{
-  "dish": "Chicken Biryani",
-  "cuisine": "Mughlai",
-  "confidence": 0.97,
-  "calories": 680,
-  "macros": { "carbs": 72, "protein": 38, "fat": 22 },
-  "matches": [
-    {
-      "restaurant": "Behrouz Biryani",
-      "platform": "swiggy",
-      "price": 289,
-      "deliveryTime": 28,
-      "rating": 4.5,
-      "distance": 4.2
-    }
-  ]
-}
-```
-
-### `POST /api/order`
-
-**Request**
-```json
-{ "paymentMethod": "COD" }
-```
-
-The normal flow places the current cart created through `POST /api/cart`. The backend still accepts inline items for compatibility:
-```json
-{
-  "paymentMethod": "COD",
-  "items": [
-    { "restaurantId": "string", "itemId": "string", "quantity": 1 }
-  ]
-}
-```
-
-**Response**
-```json
-{ "orderId": "SW-847291", "eta": 28, "status": "confirmed", "itemCount": 2 }
-```
-
-### Checkout endpoints
-
-- `GET /api/addresses`
-- `POST /api/search`
-- `POST /api/cart`
-- `GET /api/cart`
-- `GET /api/coupons`
-- `POST /api/coupons/apply`
-- `POST /api/support/report`
-
-### `GET /api/track/:orderId`
-
-**Response**
-```json
-{ "orderId": "string", "status": "preparing|out_for_delivery|delivered", "eta": 18 }
-```
-
-## Getting started
+## Running locally
 
 ```bash
-# Clone
 git clone https://github.com/snavya0309/snaporder.git
 cd snaporder
 
-# Frontend
-cd frontend && npm install && npm run dev
+# Backend (terminal 1)
+cd backend
+npm install
+cp .env.example .env          # add ANTHROPIC_API_KEY if you have one
+npm run dev                   # → http://localhost:3001
 
-# Backend (separate terminal)
-cd backend && npm install && npm run dev
+# Frontend (terminal 2)
+cd frontend
+npm install
+npm run dev                   # → http://localhost:3000
 ```
+
+The app works fully without any API keys — everything falls back to deterministic mocks.
 
 ## Environment variables
 
-**frontend/.env** (copy from `.env.example`)
+**`backend/.env`**
 ```
-VITE_API_URL=http://localhost:3001
-```
-
-**backend/.env** (copy from `.env.example`)
-```
-ANTHROPIC_API_KEY=your_key
-SWIGGY_CLIENT_ID=your_id
-SWIGGY_CLIENT_SECRET=your_secret
-SWIGGY_MCP_URL=https://mcp.swiggy.com
+ANTHROPIC_API_KEY=           # optional — mock used if blank
+SWIGGY_CLIENT_ID=            # pending MCP access
+SWIGGY_CLIENT_SECRET=        # pending MCP access
 PORT=3001
 ```
 
-## Who owns what
+**`frontend/.env`** — not required locally (Vite proxies `/api` to port 3001 automatically)
 
-| Area | Owner |
-|---|---|
-| React screens & components | Person 1 |
-| Claude Vision integration | Person 1 |
-| Swiggy MCP + ordering flow | Person 1 |
-| Node.js API server | Person 2 |
-| Swiggy OAuth flow | Person 2 |
-| Nutrition database | Person 2 |
-| Deployment | Person 2 |
+## API reference
 
-## Built for
+### `POST /api/identify`
+Accepts an image or a dish name (text fallback).
+```json
+{ "image": "<base64 jpeg>" }
+// or
+{ "dish": "Masala Dosa" }
+```
+Returns `{ dish, cuisine, confidence, calories, macros, matches[] }`.
 
-Swiggy MCP Builders Club — applying for early API access.
+### `POST /api/search`
+```json
+{ "dish": "Burger", "addressId": "addr-home" }
+```
+
+### `POST /api/cart`
+```json
+{ "restaurantId": "beh-001", "addressId": "addr-home", "items": [{ "itemId": "item-biryani-001", "quantity": 2 }] }
+```
+
+### `POST /api/coupons/apply`
+```json
+{ "code": "SNAP50" }
+```
+Category-aware — BIRYANI75 only works on biryani carts, PIZZA50 on pizza.
+
+### `POST /api/order`
+```json
+{ "paymentMethod": "COD", "restaurantId": "...", "items": [...] }
+```
+
+### `GET /api/track/:orderId`
+Status advances: `confirmed → preparing → out_for_delivery → delivered` based on real elapsed time.
+
+## Deployment
+
+Single Vercel project from repo root. `vercel.json` routes `/api/*` to the Express backend and everything else to the Vite-built frontend.
+
+```
+vercel deploy
+```
+
+Set `ANTHROPIC_API_KEY` in Vercel environment variables when real Claude Vision is needed.
+
+## What's left to build
+
+- Swap Swiggy mock for real MCP calls (`services/swiggy.js` — all stubs are marked `TODO`)
+- Swiggy OAuth flow (`/auth/callback` endpoint)
+- Add more dishes to `services/nutrition.js` (currently 14)
+- PWA manifest for mobile install

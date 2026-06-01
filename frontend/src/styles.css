@@ -907,6 +907,168 @@ img {
   width: 1px;
 }
 
+/* ── Dietary indicators ── */
+.platform-row {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+}
+
+.diet-dot {
+  border-radius: 3px;
+  border-width: 2px;
+  border-style: solid;
+  display: inline-block;
+  flex-shrink: 0;
+  height: 14px;
+  width: 14px;
+}
+
+.diet-dot.veg    { border-color: #4ade80; background: rgba(74,222,128,0.18); }
+.diet-dot.nonveg { border-color: #f87171; background: rgba(248,113,113,0.18); }
+
+/* ── Filter row ── */
+.filter-row {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.filter-btn {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 600;
+  min-height: 34px;
+  padding: 0 14px;
+  transition: background 160ms, color 160ms, border-color 160ms;
+}
+
+.filter-btn.active {
+  background: rgba(252, 86, 34, 0.14);
+  border-color: rgba(252, 86, 34, 0.5);
+  color: var(--orange);
+}
+
+.address-select {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  color: var(--text);
+  font: inherit;
+  font-size: 0.8rem;
+  min-height: 34px;
+  padding: 0 10px;
+}
+
+/* ── Scan text fallback ── */
+.search-fallback { margin-top: 4px; }
+
+.dish-search-input {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--text);
+  font: inherit;
+  min-height: 48px;
+  padding: 0 16px;
+  width: 100%;
+}
+
+.dish-search-input:focus {
+  border-color: var(--orange);
+  outline: none;
+}
+
+/* ── Tracking progress bar ── */
+.tracking-progress-bar {
+  background: rgba(255,255,255,0.08);
+  border-radius: 999px;
+  height: 6px;
+  margin: 24px 0 0;
+  overflow: hidden;
+}
+
+.tracking-progress-fill {
+  background: var(--orange);
+  border-radius: 999px;
+  height: 100%;
+  transition: width 600ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ── Order history ── */
+.history-layout {
+  animation: rise 280ms ease-out;
+  padding-bottom: 48px;
+}
+
+.history-header {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: grid;
+  gap: 16px;
+  margin-bottom: 28px;
+  padding: clamp(20px, 4vw, 36px);
+}
+
+.history-header h1 {
+  font-size: clamp(2.5rem, 8vw, 5rem);
+  line-height: 1;
+  margin-top: 6px;
+}
+
+.history-list { display: grid; gap: 12px; }
+
+.history-card {
+  background: rgba(21,20,19,0.9);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 18px;
+}
+
+.history-card-top {
+  align-items: flex-start;
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.history-card h3 { font-size: 1.1rem; margin: 0 0 4px; }
+
+.history-cal {
+  flex-shrink: 0;
+  text-align: right;
+}
+
+.history-cal strong {
+  color: var(--orange);
+  display: block;
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.history-cal span { color: var(--muted); font-size: 0.8rem; }
+
+.history-meta {
+  color: var(--muted);
+  display: flex;
+  font-size: 0.8rem;
+  gap: 12px;
+  margin: 10px 0 0;
+}
+
+.history-empty {
+  padding: 48px 0;
+  text-align: center;
+}
+
+.history-empty p { margin: 6px 0; }
+
 @keyframes spin {
   to {
     transform: rotate(360deg);

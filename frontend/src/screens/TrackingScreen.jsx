@@ -37,6 +37,7 @@ export default function TrackingScreen({ order, onDone }) {
 
   const steps = ['confirmed', 'preparing', 'out_for_delivery', 'delivered']
   const currentIdx = steps.indexOf(status)
+  const progressPct = Math.round(((currentIdx + 1) / steps.length) * 100)
   const itemCount = order?.itemCount || 1
 
   async function handleReportIssue() {
@@ -62,6 +63,10 @@ export default function TrackingScreen({ order, onDone }) {
           #{order?.orderId} · {itemCount} item{itemCount === 1 ? '' : 's'}
           {order?.restaurant?.name ? ` from ${order.restaurant.name}` : ''}
         </p>
+        <div className="tracking-progress-bar" title={`${progressPct}% complete`}>
+          <div className="tracking-progress-fill" style={{ width: `${progressPct}%` }} />
+        </div>
+
         <div className="eta-block">
           <span>ETA</span>
           <strong>{eta === 0 ? 'Arrived' : `${eta} min`}</strong>

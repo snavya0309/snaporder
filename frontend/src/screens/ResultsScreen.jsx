@@ -1,13 +1,25 @@
-import { useMemo, useState } from 'react'
-import { updateCart } from '../utils/api'
+import { useEffect, useMemo, useState } from 'react'
+import { getAddresses, updateCart } from '../utils/api'
 
 export default function ResultsScreen({ result, onCheckout, onBack }) {
   const [quantities, setQuantities] = useState(() => createInitialQuantities(result.matches || []))
   const [buildingCart, setBuildingCart] = useState(false)
   const [error, setError] = useState('')
+  const [vegOnly, setVegOnly] = useState(false)
+  const [addresses, setAddresses] = useState([])
+  const [addressId, setAddressId] = useState('')
+
+  useEffect(() => {
+    getAddresses().then(data => {
+      const list = data.addresses || []
+      setAddresses(list)
+      if (list.length > 0) setAddressId(list[0].id)
+    }).catch(() => {})
+  }, [])
 
   const confidence = Math.round((result.confidence || 0) * 100)
-  const matches = result.matches || []
+  const allMatches = result.matches || []
+  const matches = vegOnly ? allMatches.filter(m => m.isVeg) : allMatches
   const selectedItems = useMemo(
     () => matches
       .map(match => ({ ...match, quantity: quantities[getMatchKey(match)] || 0 }))
@@ -27,7 +39,7 @@ export default function ResultsScreen({ result, onCheckout, onBack }) {
     setError('')
     try {
       const { cart } = await updateCart({
-        addressId: selectedItems[0].addressId,
+        addressId: addressId || selectedItems[0].addressId,
         restaurantId: selectedItems[0].restaurantId,
         items: selectedItems.map(item => ({
           itemId: item.itemId,
@@ -100,7 +112,16 @@ export default function ResultsScreen({ result, onCheckout, onBack }) {
 
       <div className="section-heading">
         <h2>Order Matches</h2>
-        <span>{itemCount} item{itemCount === 1 ? '' : 's'} selected</span>
+        <div className="filter-row">
+          <button className={`filter-btn ${!vegOnly ? 'active' : ''}`} type="button" onClick={() => setVegOnly(false)}>All</button>
+          <button className={`filter-btn ${vegOnly ? 'active' : ''}`} type="button" onClick={() => setVegOnly(true)}>🟢 Veg only</button>
+          {addresses.length > 0 && (
+            <select className="address-select" value={addressId} onChange={e => setAddressId(e.target.value)}>
+              {addresses.map(a => <option key={a.id} value={a.id}>{a.label} — {a.displayText}</option>)}
+            </select>
+          )}
+          <span>{itemCount} selected</span>
+        </div>
       </div>
 
       {error && <p className="error-text">{error}</p>}
@@ -112,7 +133,10 @@ export default function ResultsScreen({ result, onCheckout, onBack }) {
           return (
             <article className="match-card" key={key}>
               <div>
-                <span className="platform">{match.platform}</span>
+                <div className="platform-row">
+                  <span className="platform">{match.platform}</span>
+                  <span className={`diet-dot ${match.isVeg ? 'veg' : 'nonveg'}`} title={match.isVeg ? 'Veg' : 'Non-veg'} />
+                </div>
                 <h3>{match.restaurant}</h3>
                 <p>{match.itemName || result.dish}</p>
                 <div className="match-meta">

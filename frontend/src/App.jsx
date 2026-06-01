@@ -3,6 +3,7 @@ import ScanScreen from './screens/ScanScreen'
 import ResultsScreen from './screens/ResultsScreen'
 import CheckoutScreen from './screens/CheckoutScreen'
 import TrackingScreen from './screens/TrackingScreen'
+import HistoryScreen from './screens/HistoryScreen'
 import CalorieTracker from './components/CalorieTracker'
 import { useCalorieTracker } from './hooks/useCalorieTracker'
 
@@ -64,6 +65,7 @@ export default function App() {
           macros={calorieTracker.macros}
           entries={calorieTracker.entries}
           onClear={calorieTracker.clearToday}
+          onViewHistory={() => setScreen('history')}
         />
       </header>
 
@@ -86,6 +88,15 @@ export default function App() {
           />
         )}
         {screen === 'tracking' && <TrackingScreen order={order} onDone={handleDone} />}
+        {screen === 'history' && (
+          <HistoryScreen
+            entries={calorieTracker.entries}
+            total={calorieTracker.total}
+            macros={calorieTracker.macros}
+            onClear={calorieTracker.clearToday}
+            onBack={() => setScreen('scan')}
+          />
+        )}
       </main>
     </div>
   )
